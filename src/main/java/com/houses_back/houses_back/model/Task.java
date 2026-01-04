@@ -11,20 +11,19 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "chat_message")
-public class ChatMessage {
+@Table(name = "task")
+public class Task {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String chatId; 
-    private String sender;
-    private String content;
-    private LocalDateTime timestamp = LocalDateTime.now();
 
-    public void setChatId(String chatId) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+    private String chatId;
+
+    private String title;
+    private String description;
+
+    private boolean completed = false;
+
+    private LocalDateTime createdAt = LocalDateTime.now();
 }
-
-

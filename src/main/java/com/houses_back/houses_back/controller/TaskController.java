@@ -5,29 +5,29 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
-import com.houses_back.houses_back.model.ChatMessage;
-import com.houses_back.houses_back.repository.ChatMessageRepository;
+import com.houses_back.houses_back.model.Task;
+import com.houses_back.houses_back.repository.TaskRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequiredArgsConstructor
-public class ChatController {
+public class TaskController {
 
-    private final ChatMessageRepository repository;
+    private final TaskRepository repository;
     private final SimpMessagingTemplate messagingTemplate;
 
-    @MessageMapping("/chat/{chatId}/send")
-    public void sendMessage(
+    @MessageMapping("/tasks/{chatId}/create")
+    public void createTask(
             @DestinationVariable String chatId,
-            ChatMessage message
+            Task task
     ) {
-        message.setChatId(chatId);
-        repository.save(message);
+        task.setChatId(chatId);
+        repository.save(task);
 
         messagingTemplate.convertAndSend(
-                "/topic/chat/" + chatId,
-                message
+                "/topic/tasks/" + chatId,
+                task
         );
     }
 }
