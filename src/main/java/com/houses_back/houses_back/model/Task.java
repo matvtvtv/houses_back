@@ -22,7 +22,7 @@ public class Task {
 
     private String title;
     private String description;
-
+    private int money;
     private boolean completed = false;
 
     private LocalDateTime createdAt = LocalDateTime.now();
