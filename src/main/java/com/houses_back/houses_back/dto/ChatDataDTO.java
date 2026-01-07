@@ -7,8 +7,12 @@ import lombok.Setter;
 @Data
 @Getter
 @Setter
-public class RegisterRequest {
-    private String login;
-    private String password;
-    private String role;
+
+public class ChatDataDTO {
+
+    private String chatLogin;
+    private String userLogin;
+    private String userRole;
+    
+
 }
