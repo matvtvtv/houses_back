@@ -13,17 +13,19 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public UserModel register(String login, String password, String role) {
-        if (userRepository.existsByLogin(login)) {
-            throw new RuntimeException("Login already exists");
-        }
-
-        UserModel user = new UserModel();
-        user.setLogin(login);
-        user.setPassword(password); 
-        user.setRole(role);
-        user.setMoney(0);
-        user.setImage("");
-        return userRepository.save(user);
+   public UserModel register(String login, String name, String password, String role) {
+    if (userRepository.existsByLogin(login)) {
+        throw new RuntimeException("Login already exists");
     }
+
+    UserModel user = new UserModel();
+    user.setLogin(login);
+    user.setName(name);
+    user.setPassword(password); // позже зашифруем
+    user.setRole(role);
+    user.setImage("");
+
+    return userRepository.save(user);
+}
+
 }

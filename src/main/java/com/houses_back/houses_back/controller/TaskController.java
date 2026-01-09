@@ -17,16 +17,16 @@ public class TaskController {
     private final TaskRepository repository;
     private final SimpMessagingTemplate messagingTemplate;
 
-    @MessageMapping("/tasks/{chatId}/create")
+    @MessageMapping("/tasks/{chatLogin}/create")
     public void createTask(
-            @DestinationVariable String chatId,
+            @DestinationVariable String chatLogin,
             Task task
     ) {
-        task.setChatId(chatId);
+        task.setChatLogin(chatLogin);
         repository.save(task);
 
         messagingTemplate.convertAndSend(
-                "/topic/tasks/" + chatId,
+                "/topic/tasks/" + chatLogin,
                 task
         );
     }

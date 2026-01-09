@@ -8,12 +8,8 @@ import lombok.Setter;
 @Getter
 @Setter
 
-public class ChatDataDTO {
 
+public class JoinChatDataDTO {
     private String chatLogin;
-    private String chatName;
     private String userLogin;
-    private String userRole;
-    
-
 }

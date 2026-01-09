@@ -20,8 +20,8 @@ public class ChatRestController {
 
     private final ChatMessageRepository repository;
 
-    @GetMapping("/history/{chatId}")
-    public List<ChatMessage> history(@PathVariable String chatId) {
-        return repository.findByChatIdOrderByTimestampAsc(chatId);
+    @GetMapping("/history/{chatLogin}")
+    public List<ChatMessage> history(@PathVariable String chatLogin) {
+        return repository.findByChatLoginOrderByTimestampAsc(chatLogin);
     }
 }

@@ -19,8 +19,8 @@ public class TaskRestController {
 
     private final TaskRepository repository;
 
-    @GetMapping("/{chatId}")
-    public List<Task> getTasks(@PathVariable String chatId) {
-        return repository.findByChatIdOrderByCreatedAtAsc(chatId);
+    @GetMapping("/{chatLogin}")
+    public List<Task> getTasks(@PathVariable String chatLogin) {
+        return repository.findByChatLoginOrderByCreatedAtAsc(chatLogin);
     }
 }

@@ -10,5 +10,5 @@ import com.houses_back.houses_back.model.ChatMessage;
 
 @Repository
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
-    List<ChatMessage> findByChatIdOrderByTimestampAsc(String chatId);
+    List<ChatMessage> findByChatLoginOrderByTimestampAsc(String chatLogin);
 }

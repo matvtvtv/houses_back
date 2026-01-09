@@ -17,16 +17,16 @@ public class ChatController {
     private final ChatMessageRepository repository;
     private final SimpMessagingTemplate messagingTemplate;
 
-    @MessageMapping("/chat/{chatId}/send")
+    @MessageMapping("/chat/{chatLogin}/send")
     public void sendMessage(
-            @DestinationVariable String chatId,
+            @DestinationVariable String chatLogin,
             ChatMessage message
     ) {
-        message.setChatId(chatId);
+        message.setChatLogin(chatLogin);
         repository.save(message);
 
         messagingTemplate.convertAndSend(
-                "/topic/chat/" + chatId,
+                "/topic/chat/" + chatLogin,
                 message
         );
     }

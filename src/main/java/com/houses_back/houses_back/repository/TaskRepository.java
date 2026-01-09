@@ -9,5 +9,5 @@ import com.houses_back.houses_back.model.Task;
 
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
-    List<Task> findByChatIdOrderByCreatedAtAsc(String chatId);
+    List<Task> findByChatLoginOrderByCreatedAtAsc(String chatLogin);
 }

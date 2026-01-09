@@ -23,6 +23,7 @@ public class UserController {
     public UserModel register(@RequestBody UserDTO request) {
         return userService.register(
             request.getLogin(),
+            request.getName(),
             request.getPassword(),
             request.getRole()
         );

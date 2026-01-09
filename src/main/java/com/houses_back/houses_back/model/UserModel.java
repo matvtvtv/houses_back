@@ -25,12 +25,13 @@ public class UserModel {
     @Column(unique = true, nullable = false)
     private String login;
 
+    @Column(unique = false, nullable = false)
+    private String name;
+
     @Column(nullable = false)
     private String password;
 
     private String image;
-
-    private int money;
 
     @Column(nullable = false)
     private String role;
