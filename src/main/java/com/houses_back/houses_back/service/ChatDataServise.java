@@ -22,6 +22,10 @@ public class ChatDataServise {
         return chatDataRepository.findByUserLogin(userLogin);
     }
 
+    public List<ChatData> findByChatLogin(String chatLogin) {
+        return chatDataRepository.findByChatLogin(chatLogin);
+    }
+
     public ChatData register(String chatLogin, String chatName , String userLogin,String userRole) {
 
         if (chatDataRepository.existsByChatLoginAndUserLogin(chatLogin, userLogin)) {

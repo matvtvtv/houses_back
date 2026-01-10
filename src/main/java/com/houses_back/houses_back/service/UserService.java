@@ -13,19 +13,27 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-   public UserModel register(String login, String name, String password, String role) {
-    if (userRepository.existsByLogin(login)) {
-        throw new RuntimeException("Login already exists");
+    public UserModel register(String login, String name, String password, String role) {
+        if (userRepository.existsByLogin(login)) {
+            throw new RuntimeException("Login already exists");
+        }
+
+        UserModel user = new UserModel();
+        user.setLogin(login);
+        user.setName(name);
+        user.setPassword(password); // позже зашифруем
+        user.setRole(role);
+        user.setImage("");
+
+        return userRepository.save(user);
     }
 
-    UserModel user = new UserModel();
-    user.setLogin(login);
-    user.setName(name);
-    user.setPassword(password); // позже зашифруем
-    user.setRole(role);
-    user.setImage("");
+    public UserModel login(String login, String password) {
+        return userRepository.findByLogin(login)
+            .filter(user -> user.getPassword().equals(password))
+            .orElseThrow(() -> new RuntimeException("Invalid login or password"));
+    }
 
-    return userRepository.save(user);
-}
+
 
 }

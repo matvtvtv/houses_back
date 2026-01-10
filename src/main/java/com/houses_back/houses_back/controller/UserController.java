@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.houses_back.houses_back.dto.EnteranceDTO;
 import com.houses_back.houses_back.dto.UserDTO;
 import com.houses_back.houses_back.model.UserModel;
 import com.houses_back.houses_back.service.UserService;
@@ -26,6 +27,13 @@ public class UserController {
             request.getName(),
             request.getPassword(),
             request.getRole()
+        );
+    }
+    @PostMapping("/login")
+    public UserModel login(@RequestBody EnteranceDTO request) {
+        return userService.login(
+            request.getLogin(),
+            request.getPassword()
         );
     }
 }

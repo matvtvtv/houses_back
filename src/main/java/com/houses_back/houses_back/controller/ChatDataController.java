@@ -45,5 +45,10 @@ public class ChatDataController {
         public List <ChatData> findByUserLogin(@PathVariable String userLogin){
         return chatDataServise.findByUserLogin(userLogin);
     }
+     @GetMapping("/get_chats_users/{chatLogin}")
+        public List <ChatData> findByChatLogin(@PathVariable String chatLogin){
+        return chatDataServise.findByChatLogin(chatLogin);
+    }
+
 
 }
