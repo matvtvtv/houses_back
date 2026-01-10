@@ -19,13 +19,21 @@ public class Task {
     private Long id;
 
     private String chatLogin;
-    private String userLogin;
+
+    private String userLogin;//кто задал
+    private String targetLogin;//кому, если пустое, то всем 
+
+
+
     private String title;
     private String description;
     private int money;
+    
 
     private boolean execution = false;
+
     private boolean completed = false;
+
 
     private LocalDateTime createdAt = LocalDateTime.now();
 }

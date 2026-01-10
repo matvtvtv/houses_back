@@ -23,6 +23,7 @@ public class ChatController {
             ChatMessage message
     ) {
         message.setChatLogin(chatLogin);
+        System.out.println(message.getImage());
         repository.save(message);
 
         messagingTemplate.convertAndSend(

@@ -30,7 +30,8 @@ public class UserModel {
 
     @Column(nullable = false)
     private String password;
-
+    
+    @Column(columnDefinition = "TEXT")
     private String image;
 
     @Column(nullable = false)

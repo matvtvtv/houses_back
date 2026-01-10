@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class MessageDTO {
     private String sender;
     private String content;
+    private String image;
 }
