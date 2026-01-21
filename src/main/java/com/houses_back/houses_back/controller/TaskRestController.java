@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/tasks")
+@RequestMapping("/api/tasks/c")
 public class TaskRestController {
 
     private final TaskRepository repository;

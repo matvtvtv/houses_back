@@ -17,7 +17,7 @@ public class TaskController {
     private final TaskRepository repository;
     private final SimpMessagingTemplate messagingTemplate;
 
-    @MessageMapping("/tasks/{chatLogin}/create")
+    @MessageMapping("/tasks/c/{chatLogin}/create")
     public void createTask(@DestinationVariable String chatLogin, Task task) {
         task.setChatLogin(chatLogin);
         repository.save(task);
@@ -25,7 +25,7 @@ public class TaskController {
         messagingTemplate.convertAndSend("/topic/tasks/" + chatLogin, task);
     }
 
-    @MessageMapping("/tasks/{chatLogin}/update")
+    @MessageMapping("/tasks/c/{chatLogin}/update")
     public void updateTaskWs(@DestinationVariable String chatLogin, Task updatedTask) {
         Task task = repository.findById(updatedTask.getId())
                 .orElseThrow(() -> new RuntimeException("Task not found"));

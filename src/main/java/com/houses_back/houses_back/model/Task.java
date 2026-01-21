@@ -60,4 +60,7 @@ public class Task {
     // Дата создания
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+
+    
 }
