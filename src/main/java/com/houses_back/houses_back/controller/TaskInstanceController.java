@@ -59,12 +59,29 @@ public class TaskInstanceController {
     }
 
   
-    @PatchMapping("/instance/{instanceId}/status")
-    public ResponseEntity<TaskInstance> patchStatus(@PathVariable Long instanceId,
-                                                    @RequestBody StatusPatch payload) {
-        TaskInstance inst = taskService.patchInstanceStatus(instanceId, payload.isCompleted());
-        return ResponseEntity.ok(inst);
+
+@PatchMapping("/instance/{instanceId}/status")
+public ResponseEntity<TaskInstance> patchStatus(@PathVariable Long instanceId,
+                                                @RequestBody StatusPatch payload) {
+    // Обновляем статус
+    TaskInstance inst = taskService.patchInstanceStatus(instanceId, payload.isCompleted());
+
+    // Если задача завершена - начисляем монеты и обновляем статистику
+    if (payload.isCompleted()) {
+        // Получаем полный объект с данными о пользователе
+        TaskInstance fullInst = taskService.getInstance(instanceId);
+        
+        // Начисляем монеты и обновляем статистику
+        taskService.awardCoinsAndLogStats(fullInst);
+
+        // Отправляем WS уведомление с полными данными
+        String chatLogin = fullInst.getTemplate().getChatLogin();
+        messagingTemplate.convertAndSend("/topic/tasks/" + chatLogin, taskService.toDto(fullInst));
     }
+
+    return ResponseEntity.ok(inst);
+}
+
 
     // Вспомогательный класс payload
     public static class StatusPatch {
@@ -72,4 +89,5 @@ public class TaskInstanceController {
         public boolean isCompleted() { return completed; }
         public void setCompleted(boolean completed) { this.completed = completed; }
     }
+
 }

@@ -10,10 +10,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.houses_back.houses_back.dto.TaskInstanceDTO;
+import com.houses_back.houses_back.model.ChatData;
 import com.houses_back.houses_back.model.TaskInstance;
 import com.houses_back.houses_back.model.TaskTemplate;
+import com.houses_back.houses_back.model.UserDailyStats;
+import com.houses_back.houses_back.repository.ChatDataRepository;
 import com.houses_back.houses_back.repository.TaskInstanceRepository;
 import com.houses_back.houses_back.repository.TaskTemplateRepository;
+import com.houses_back.houses_back.repository.UserDailyStatsRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,7 +27,8 @@ public class TaskService {
 
     private final TaskTemplateRepository templateRepository;
     private final TaskInstanceRepository instanceRepository;
-
+    private final UserDailyStatsRepository statsRepository; 
+    private final ChatDataRepository chatDataRepository;   
     /**
      * Создать шаблон задачи.
      */
@@ -220,4 +225,40 @@ public class TaskService {
                 .build();
         return instanceRepository.save(instance);
     }
+    @Transactional
+public void awardCoinsAndLogStats(TaskInstance instance) {
+    if (instance.getUserLogin() == null || instance.getUserLogin().isEmpty()) {
+        return; // Никто не выполнял задачу - монеты не начисляются
+    }
+
+    String userLogin = instance.getUserLogin();
+    String chatLogin = instance.getTemplate().getChatLogin();
+    int money = instance.getTemplate().getMoney();
+
+    // 1. Начислить монеты в ChatData
+    ChatData chatData = chatDataRepository.findByChatLoginAndUserLogin(chatLogin, userLogin)
+            .orElseThrow(() -> new RuntimeException("ChatData not found for user: " + userLogin));
+    chatData.setMoney(chatData.getMoney() + money);
+    chatDataRepository.save(chatData);
+
+    // 2. Обновить статистику
+    LocalDate today = LocalDate.now();
+    UserDailyStats stats = statsRepository
+            .findByUserLoginAndChatLoginAndDate(userLogin, chatLogin, today)
+            .orElse(UserDailyStats.builder()
+                    .userLogin(userLogin)
+                    .chatLogin(chatLogin)
+                    .date(today)
+                    .completedTasksCount(0)
+                    .build());
+
+    stats.setCompletedTasksCount(stats.getCompletedTasksCount() + 1);
+    statsRepository.save(stats);
+}
+
+// Добавьте вспомогательный метод для получения TaskInstance
+public TaskInstance getInstance(Long instanceId) {
+    return instanceRepository.findById(instanceId)
+            .orElseThrow(() -> new RuntimeException("TaskInstance not found: " + instanceId));
+}
 }

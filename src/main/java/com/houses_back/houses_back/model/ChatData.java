@@ -33,7 +33,7 @@ public class ChatData{
     @Column(name = "user_role")
     private String userRole;
 
-    @Column(name = "money")
-    private int money;
+    @Column(name = "money", nullable = false)
+    private int money = 0;
     
 }
