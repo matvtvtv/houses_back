@@ -50,6 +50,10 @@ public class TaskService {
         if (updated.getMoney() > 0) t.setMoney(updated.getMoney());
         if (updated.getStartDate() != null) t.setStartDate(updated.getStartDate());
         if (updated.getRepeatDays() != null) t.setRepeatDays(updated.getRepeatDays());
+        if (updated.getStartTime() != null)t.setStartTime(updated.getStartTime());
+        if (updated.getEndTime() != null)t.setEndTime(updated.getEndTime());
+        if (updated.getPartDay() != null) t.setPartDay(updated.getPartDay());
+        if (updated.getImportance() > 0) t.setImportance(updated.getImportance());
         t.setRepeat(updated.isRepeat());
         if (updated.getTargetLogin() != null) t.setTargetLogin(updated.getTargetLogin());
         return templateRepository.save(t);
@@ -139,6 +143,10 @@ public class TaskService {
         dto.setChatLogin(tpl.getChatLogin());
         dto.setTargetLogin(tpl.getTargetLogin());
         dto.setRepeat(tpl.isRepeat());
+        dto.setStartTime(tpl.getStartTime());
+        dto.setEndTime(tpl.getEndTime());
+        dto.setPartDay(tpl.getPartDay());
+        dto.setImportance(tpl.getImportance());
         dto.setRepeatDays(tpl.getRepeatDays());
         dto.setTemplateUserLogin(tpl.getUserLogin());
         return dto;

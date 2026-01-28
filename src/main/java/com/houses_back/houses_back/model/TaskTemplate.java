@@ -51,6 +51,14 @@ public class TaskTemplate {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+   
+    private String startTime;
+    private String endTime;
+
+    private String partDay;
+
+    private int importance;
+
 
     // Автоматическая установка createdAt перед сохранением
     @PrePersist

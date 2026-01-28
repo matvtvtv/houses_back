@@ -24,5 +24,9 @@ public class TaskInstanceDTO {
     private String targetLogin;
     private boolean repeat;
     private List<String> repeatDays;
+    private String startTime;
+    private String endTime;
+    private String partDay;
+    private int importance;
     private String templateUserLogin;
 }
