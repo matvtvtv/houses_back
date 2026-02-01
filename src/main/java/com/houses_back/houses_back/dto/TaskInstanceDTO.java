@@ -29,4 +29,6 @@ public class TaskInstanceDTO {
     private String partDay;
     private int importance;
     private String templateUserLogin;
+    private boolean started;
+    private boolean confirmedByParent;
 }

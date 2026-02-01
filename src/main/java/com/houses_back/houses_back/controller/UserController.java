@@ -9,9 +9,16 @@ import org.springframework.web.bind.annotation.RestController;
 import com.houses_back.houses_back.dto.EnteranceDTO;
 import com.houses_back.houses_back.dto.UserDTO;
 import com.houses_back.houses_back.model.UserModel;
+import com.houses_back.houses_back.repository.UserRepository;
 import com.houses_back.houses_back.service.UserService;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.Optional;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
 
 @RestController
 @RequestMapping("/api/user")
@@ -19,6 +26,9 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 
     private final UserService userService;
+
+    private final UserRepository userRepository;
+
 
     @PostMapping("/register")
     public UserModel register(@RequestBody UserDTO request) {
@@ -36,4 +46,11 @@ public class UserController {
             request.getPassword()
         );
     }
+
+    @GetMapping("/enter/{login}")
+    public Optional<UserModel> getMethodName(@PathVariable String login) {
+        return userRepository.findByLogin(login);
+    }
+    
+
 }

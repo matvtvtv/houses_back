@@ -31,17 +31,43 @@ public class TaskInstanceController {
      private final SimpMessagingTemplate messagingTemplate; // <-- добавлено
 
     @PutMapping("/instance/{instanceId}")
-    public ResponseEntity<TaskInstance> updateInstance(@PathVariable Long instanceId,
-                                                       @RequestBody TaskInstance update) {
-        TaskInstance inst = taskService.updateInstance(instanceId, update);
+public ResponseEntity<TaskInstance> updateInstance(@PathVariable Long instanceId,
+                                                   @RequestBody TaskInstance update) {
+    // получаем текущий инстанс до изменений
+    TaskInstance before = taskService.getInstance(instanceId);
+    boolean wasCompleted = before.isCompleted();
+    boolean wasConfirmedByParent = before.isConfirmedByParent();
 
-        // Отправляем по WS обновлённый DTO
-        TaskInstanceDTO dto = taskService.toDto(inst);
-        String chatLogin = inst.getTemplate().getChatLogin();
-        messagingTemplate.convertAndSend("/topic/tasks/" + chatLogin, dto);
+    TaskInstance inst = taskService.updateInstance(instanceId, update);
 
-        return ResponseEntity.ok(inst);
+    // Отправляем по WS обновлённый DTO
+    TaskInstanceDTO dto = taskService.toDto(inst);
+    String chatLogin = inst.getTemplate().getChatLogin();
+    messagingTemplate.convertAndSend("/topic/tasks/" + chatLogin, dto);
+
+    
+    if (!wasCompleted && inst.isCompleted()) {
+        try {
+            if (wasConfirmedByParent == inst.isConfirmedByParent()) {
+                try {
+                    taskService.awardCoinsAndLogStats(inst);
+            // отправим ещё раз с полными данными (если awardCoins обновляет данные)
+            messagingTemplate.convertAndSend("/topic/tasks/" + chatLogin, taskService.toDto(inst));
+        } catch (Exception ex) {
+           
+        }
     }
+           
+            messagingTemplate.convertAndSend("/topic/tasks/" + chatLogin, taskService.toDto(inst));
+        } catch (Exception ex) {
+           
+        }
+    }
+    
+
+    return ResponseEntity.ok(inst);
+}
+
     /**
      * Получить/создать экземпляры задач для chatLogin в диапазоне дат.
      * Пример: GET /api/tasks/{chatLogin}?from=2026-01-01&to=2026-01-14
@@ -81,7 +107,20 @@ public ResponseEntity<TaskInstance> patchStatus(@PathVariable Long instanceId,
 
     return ResponseEntity.ok(inst);
 }
+// PATCH /api/tasks/instance/{id}/confirm
+    @PatchMapping("/{id}/confirm")
+    public ResponseEntity<TaskInstanceDTO> confirmByParent(@PathVariable Long id) {
+        TaskInstance inst = taskService.confirmByParent(id);
+        TaskInstanceDTO dto = taskService.toDto(inst);
+        String chatLogin = inst.getTemplate().getChatLogin();
 
+    
+        messagingTemplate.convertAndSend(
+            "/topic/tasks/" + chatLogin,
+            dto
+        );
+        return ResponseEntity.ok(dto);
+    }
 
     // Вспомогательный класс payload
     public static class StatusPatch {

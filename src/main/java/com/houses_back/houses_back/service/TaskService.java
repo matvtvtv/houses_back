@@ -1,6 +1,7 @@
 package com.houses_back.houses_back.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -83,6 +84,8 @@ public class TaskService {
                         instance = TaskInstance.builder()
                                 .template(tpl)
                                 .taskDate(cur)
+                                .started(false)
+                                .confirmedByParent(false)
                                 .completed(false)
                                 .createdAt(java.time.LocalDateTime.now())
                                 .build();
@@ -134,6 +137,10 @@ public class TaskService {
         dto.setComment(inst.getComment());
         dto.setPhotoBase64(inst.getPhotoBase64());
         dto.setUserLogin(inst.getUserLogin());
+        dto.setStarted(inst.isStarted());
+        dto.setConfirmedByParent(inst.isConfirmedByParent());
+
+
 
         TaskTemplate tpl = inst.getTemplate();
         dto.setTemplateId(tpl.getId());
@@ -149,6 +156,7 @@ public class TaskService {
         dto.setImportance(tpl.getImportance());
         dto.setRepeatDays(tpl.getRepeatDays());
         dto.setTemplateUserLogin(tpl.getUserLogin());
+        
         return dto;
     }
 
@@ -162,6 +170,8 @@ public class TaskService {
         if (update.getComment() != null) inst.setComment(update.getComment());
         if (update.getPhotoBase64() != null) inst.setPhotoBase64(update.getPhotoBase64());
         inst.setCompleted(update.isCompleted());
+        inst.setStarted(update.isStarted());  
+        inst.setConfirmedByParent(update.isConfirmedByParent());      
         inst.setUserLogin(update.getUserLogin());
         inst.setUpdatedAt(java.time.LocalDateTime.now());
         return instanceRepository.save(inst);
@@ -169,12 +179,37 @@ public class TaskService {
 
     @Transactional
     public TaskInstance patchInstanceStatus(Long instanceId, boolean completed) {
-        TaskInstance inst = instanceRepository.findById(instanceId)
-                .orElseThrow(() -> new RuntimeException("Instance not found"));
+        TaskInstance inst = instanceRepository.findById(instanceId).orElseThrow(() -> new RuntimeException("Instance not found"));
         inst.setCompleted(completed);
-        inst.setUpdatedAt(java.time.LocalDateTime.now());
+
+        if (completed && !inst.isStarted()) {
+            inst.setStarted(true);
+        }
+       
+
+        inst.setUpdatedAt(LocalDateTime.now());
         return instanceRepository.save(inst);
     }
+
+    @Transactional
+    public TaskInstance confirmByParent(Long instanceId) {
+    TaskInstance inst = instanceRepository.findById(instanceId)
+            .orElseThrow(() -> new RuntimeException("Instance not found"));
+
+    
+    if (!inst.isCompleted()) {
+        throw new RuntimeException("Cannot confirm an uncompleted task");
+    }
+
+    if (!inst.isConfirmedByParent()) {
+        inst.setConfirmedByParent(true);
+        inst.setUpdatedAt(LocalDateTime.now());
+        inst = instanceRepository.save(inst);
+    }
+
+    return inst;
+}
+
     
     public LocalDate findNearestDate(TaskTemplate template, LocalDate fromDate) {
         if (!template.isRepeat()) {
@@ -228,6 +263,8 @@ public class TaskService {
         TaskInstance instance = TaskInstance.builder()
                 .template(template)
                 .taskDate(date)
+                .started(false)
+                .confirmedByParent(false)
                 .completed(false)
                 .createdAt(java.time.LocalDateTime.now())
                 .build();

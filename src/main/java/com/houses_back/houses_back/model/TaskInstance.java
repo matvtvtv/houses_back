@@ -33,6 +33,12 @@ public class TaskInstance {
 
     private String userLogin;
 
+    @Column(nullable = false)
+    private boolean started;
+    @Column(nullable = false)
+    public boolean confirmedByParent;
+
+
     @Column(columnDefinition = "text")
     private String comment;
 
@@ -47,6 +53,8 @@ public class TaskInstance {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+
 
     // Гарантируем установку createdAt перед сохранением
     @PrePersist
