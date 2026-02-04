@@ -2,6 +2,7 @@ package com.houses_back.houses_back.controller;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -15,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.houses_back.houses_back.dto.TaskInstanceDTO;
+import com.houses_back.houses_back.dto.TaskTemplateUpdateDTO;
 import com.houses_back.houses_back.model.TaskInstance;
+import com.houses_back.houses_back.model.TaskTemplate;
 import com.houses_back.houses_back.service.TaskService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,40 +33,36 @@ public class TaskInstanceController {
 
      private final SimpMessagingTemplate messagingTemplate; // <-- добавлено
 
-    @PutMapping("/instance/{instanceId}")
-public ResponseEntity<TaskInstance> updateInstance(@PathVariable Long instanceId,
-                                                   @RequestBody TaskInstance update) {
-    // получаем текущий инстанс до изменений
+   @PutMapping("/instance/{instanceId}")
+public ResponseEntity<TaskInstance> updateInstance(
+        @PathVariable Long instanceId,
+        @RequestBody TaskInstance update) {
+
     TaskInstance before = taskService.getInstance(instanceId);
-    boolean wasCompleted = before.isCompleted();
-    boolean wasConfirmedByParent = before.isConfirmedByParent();
 
     TaskInstance inst = taskService.updateInstance(instanceId, update);
 
-    // Отправляем по WS обновлённый DTO
     TaskInstanceDTO dto = taskService.toDto(inst);
     String chatLogin = inst.getTemplate().getChatLogin();
+
     messagingTemplate.convertAndSend("/topic/tasks/" + chatLogin, dto);
 
-    
-    if (!wasCompleted && inst.isCompleted()) {
+    // ✅ ИСПРАВЛЕННАЯ ЛОГИКА
+    if (!before.isConfirmedByParent()          // раньше НЕ было подтверждения
+            && inst.isConfirmedByParent()      // теперь подтверждено
+            && inst.isCompleted()) {            // и задача завершена
         try {
-            if (wasConfirmedByParent == inst.isConfirmedByParent()) {
-                try {
-                    taskService.awardCoinsAndLogStats(inst);
-            // отправим ещё раз с полными данными (если awardCoins обновляет данные)
-            messagingTemplate.convertAndSend("/topic/tasks/" + chatLogin, taskService.toDto(inst));
+            taskService.awardCoinsAndLogStats(inst);
+
+            // отправим обновлённые данные после начисления
+            messagingTemplate.convertAndSend(
+                    "/topic/tasks/" + chatLogin,
+                    taskService.toDto(inst)
+            );
         } catch (Exception ex) {
-           
+            ex.printStackTrace();
         }
     }
-           
-            messagingTemplate.convertAndSend("/topic/tasks/" + chatLogin, taskService.toDto(inst));
-        } catch (Exception ex) {
-           
-        }
-    }
-    
 
     return ResponseEntity.ok(inst);
 }
@@ -108,19 +107,26 @@ public ResponseEntity<TaskInstance> patchStatus(@PathVariable Long instanceId,
     return ResponseEntity.ok(inst);
 }
 // PATCH /api/tasks/instance/{id}/confirm
-    @PatchMapping("/{id}/confirm")
-    public ResponseEntity<TaskInstanceDTO> confirmByParent(@PathVariable Long id) {
-        TaskInstance inst = taskService.confirmByParent(id);
-        TaskInstanceDTO dto = taskService.toDto(inst);
-        String chatLogin = inst.getTemplate().getChatLogin();
+@PatchMapping("/{id}/confirm")
+public ResponseEntity<TaskInstanceDTO> confirmByParent(@PathVariable Long id) {
+    TaskInstance inst = taskService.confirmByParent(id);
 
-    
-        messagingTemplate.convertAndSend(
-            "/topic/tasks/" + chatLogin,
-            dto
-        );
-        return ResponseEntity.ok(dto);
+    // После подтверждения начисляем монеты и обновляем статистику
+    try {
+        taskService.awardCoinsAndLogStats(inst);
+    } catch (Exception ex) {
+        // логируем, но не ломаем ответ клиенту
+        ex.printStackTrace();
     }
+
+    // Отправляем обновлённый DTO по WS (после начисления)
+    TaskInstanceDTO dto = taskService.toDto(inst);
+    String chatLogin = inst.getTemplate().getChatLogin();
+
+    messagingTemplate.convertAndSend("/topic/tasks/" + chatLogin, dto);
+    return ResponseEntity.ok(dto);
+}
+
 
     // Вспомогательный класс payload
     public static class StatusPatch {
@@ -128,5 +134,15 @@ public ResponseEntity<TaskInstance> patchStatus(@PathVariable Long instanceId,
         public boolean isCompleted() { return completed; }
         public void setCompleted(boolean completed) { this.completed = completed; }
     }
-
+   @PutMapping("/template/{templateId}")
+public ResponseEntity<TaskTemplate> updateTemplate(@PathVariable Long templateId,
+                                                   @RequestBody TaskTemplateUpdateDTO dto) {
+    TaskTemplate updated = taskService.updateTemplate(templateId, dto);
+    
+    // Явное приведение к Object для разрешения неоднозначности
+    messagingTemplate.convertAndSend("/topic/tasks/" + updated.getChatLogin(), 
+        (Object) Map.of("type", "TEMPLATE_UPDATED", "templateId", templateId));
+    
+    return ResponseEntity.ok(updated);
+}
 }

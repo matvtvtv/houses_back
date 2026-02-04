@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.houses_back.houses_back.dto.TaskInstanceDTO;
+import com.houses_back.houses_back.dto.TaskTemplateUpdateDTO;
 import com.houses_back.houses_back.model.ChatData;
 import com.houses_back.houses_back.model.TaskInstance;
 import com.houses_back.houses_back.model.TaskTemplate;
@@ -300,6 +301,27 @@ public void awardCoinsAndLogStats(TaskInstance instance) {
     stats.setCompletedTasksCount(stats.getCompletedTasksCount() + 1);
     statsRepository.save(stats);
 }
+
+@Transactional
+public TaskTemplate updateTemplate(Long templateId, TaskTemplateUpdateDTO dto) {
+    TaskTemplate t = templateRepository.findById(templateId)
+            .orElseThrow(() -> new RuntimeException("Template not found"));
+    
+    if (dto.getTitle() != null) t.setTitle(dto.getTitle());
+    if (dto.getDescription() != null) t.setDescription(dto.getDescription());
+    if (dto.getMoney() != null) t.setMoney(dto.getMoney());
+    if (dto.getStartDate() != null) t.setStartDate(dto.getStartDate());
+    if (dto.getRepeat() != null) t.setRepeat(dto.getRepeat());
+    if (dto.getRepeatDays() != null) t.setRepeatDays(dto.getRepeatDays());
+    if (dto.getTargetLogin() != null) t.setTargetLogin(dto.getTargetLogin());
+    if (dto.getStartTime() != null) t.setStartTime(dto.getStartTime());
+    if (dto.getEndTime() != null) t.setEndTime(dto.getEndTime());
+    if (dto.getPartDay() != null) t.setPartDay(dto.getPartDay());
+    if (dto.getImportance() != null) t.setImportance(dto.getImportance());
+    
+    return templateRepository.save(t);
+}
+
 
 // Добавьте вспомогательный метод для получения TaskInstance
 public TaskInstance getInstance(Long instanceId) {
