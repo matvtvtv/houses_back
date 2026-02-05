@@ -1,6 +1,7 @@
 package com.houses_back.houses_back.model;
 
 import java.time.Instant;
+import java.time.Month; // Добавить импорт
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,27 +19,22 @@ public class ExchangeOffer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // логин чата — к какому чату привязано предложение
     @Column(nullable = false)
     private String chatLogin;
 
-    // кто создал предложение (логин)
     @Column(nullable = false)
     private String ownerLogin;
 
-    // стоимость в монетах
+    // ИЗМЕНЕНО: month вместо cost
     @Column(nullable = false)
-    private Integer cost;
+    private Month month; // Используем java.time.Month
 
-    // краткое название (что за обмен)
     @Column(nullable = false)
     private String title;
 
-    // описание того, что получит пользователь
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    // флаг активности (если предложено, но позже завершено/отключено)
     @Column(nullable = false)
     private boolean active = true;
 

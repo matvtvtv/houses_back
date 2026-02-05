@@ -1,6 +1,7 @@
 package com.houses_back.houses_back.controller;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -25,7 +26,7 @@ public class StatsController {
     private final StatsService statsService;
 
     /**
-     * Рейтинг всех пользователей в чате (по деньгам или задачам)
+     * Лидерборд за последние 2 месяца (текущий + прошлый)
      */
     @GetMapping("/{chatLogin}/leaderboard")
     public ResponseEntity<List<UserStatsDTO>> getLeaderboard(
@@ -36,7 +37,7 @@ public class StatsController {
     }
 
     /**
-     * Статистика конкретного пользователя за период
+     * Статистика пользователя за последние 2 месяца или указанный период
      */
     @GetMapping("/{chatLogin}/{userLogin}")
     public ResponseEntity<UserStatsDTO> getUserStats(
@@ -45,24 +46,29 @@ public class StatsController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
     ) {
-        if (from == null) from = LocalDate.now().minusDays(30);
-        if (to == null) to = LocalDate.now();
-        
         return ResponseEntity.ok(statsService.getUserStats(chatLogin, userLogin, from, to));
     }
 
-    @GetMapping("/daily")
-    public ResponseEntity<List<DailyStatsDTO>> getDailyStats(
-            @RequestParam String chatLogin,
-            @RequestParam String userLogin,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
+    /**
+     * Статистика за конкретный месяц (например, "2024-01")
+     */
+    @GetMapping("/{chatLogin}/{userLogin}/month")
+    public ResponseEntity<Integer> getMonthlyMoney(
+            @PathVariable String chatLogin,
+            @PathVariable String userLogin,
+            @RequestParam String yearMonth // формат: "2024-01"
     ) {
-        // Если даты не указаны - берём последние 14 дней
-        if (from == null) from = LocalDate.now().minusDays(13);
-        if (to == null) to = LocalDate.now();
-
-        List<DailyStatsDTO> stats = statsService.getDailyStats(chatLogin, userLogin, from, to);
-        return ResponseEntity.ok(stats);
+        YearMonth ym = YearMonth.parse(yearMonth);
+        int money = statsService.getMoneyForMonth(chatLogin, userLogin, ym);
+        return ResponseEntity.ok(money);
     }
+    @GetMapping("/daily")
+public ResponseEntity<List<DailyStatsDTO>> getDaily(
+        @RequestParam String chatLogin,
+        @RequestParam String userLogin,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
+) {
+    return ResponseEntity.ok(statsService.getDailyStats(chatLogin, userLogin, from, to));
+}
 }

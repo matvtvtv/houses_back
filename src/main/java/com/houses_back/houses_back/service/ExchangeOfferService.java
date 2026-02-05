@@ -27,14 +27,14 @@ public class ExchangeOfferService {
     }
 
     public ExchangeOffer update(Long id, ExchangeOffer updated) {
-        return repo.findById(id).map(existing -> {
-            existing.setTitle(updated.getTitle());
-            existing.setDescription(updated.getDescription());
-            existing.setCost(updated.getCost());
-            existing.setActive(updated.isActive());
-            return repo.save(existing);
-        }).orElseThrow(() -> new RuntimeException("Not found"));
-    }
+    return repo.findById(id).map(existing -> {
+        existing.setTitle(updated.getTitle());
+        existing.setDescription(updated.getDescription());
+        existing.setMonth(updated.getMonth()); // ИЗМЕНЕНО
+        existing.setActive(updated.isActive());
+        return repo.save(existing);
+    }).orElseThrow(() -> new RuntimeException("Not found"));
+}
 
     public void delete(Long id) { repo.deleteById(id); }
 }

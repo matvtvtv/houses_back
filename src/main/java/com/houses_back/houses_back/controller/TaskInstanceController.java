@@ -96,8 +96,7 @@ public ResponseEntity<TaskInstance> patchStatus(@PathVariable Long instanceId,
         // Получаем полный объект с данными о пользователе
         TaskInstance fullInst = taskService.getInstance(instanceId);
         
-        // Начисляем монеты и обновляем статистику
-        taskService.awardCoinsAndLogStats(fullInst);
+     
 
         // Отправляем WS уведомление с полными данными
         String chatLogin = fullInst.getTemplate().getChatLogin();
@@ -110,15 +109,6 @@ public ResponseEntity<TaskInstance> patchStatus(@PathVariable Long instanceId,
 @PatchMapping("/{id}/confirm")
 public ResponseEntity<TaskInstanceDTO> confirmByParent(@PathVariable Long id) {
     TaskInstance inst = taskService.confirmByParent(id);
-
-    // После подтверждения начисляем монеты и обновляем статистику
-    try {
-        taskService.awardCoinsAndLogStats(inst);
-    } catch (Exception ex) {
-        // логируем, но не ломаем ответ клиенту
-        ex.printStackTrace();
-    }
-
     // Отправляем обновлённый DTO по WS (после начисления)
     TaskInstanceDTO dto = taskService.toDto(inst);
     String chatLogin = inst.getTemplate().getChatLogin();

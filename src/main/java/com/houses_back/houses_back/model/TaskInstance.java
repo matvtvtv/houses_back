@@ -1,23 +1,36 @@
 package com.houses_back.houses_back.model;
 
-import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "task_instance",
-       uniqueConstraints = {@UniqueConstraint(columnNames = {"template_id", "task_date"})})
+
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Entity
+@Table(name = "task_instance",
+       uniqueConstraints = {@UniqueConstraint(columnNames = {"template_id", "task_date"})})
 public class TaskInstance {
 
     @Id
@@ -35,9 +48,9 @@ public class TaskInstance {
 
     @Column(nullable = false)
     private boolean started;
-    @Column(nullable = false)
-    public boolean confirmedByParent;
 
+    @Column(nullable = false)
+    private boolean confirmedByParent;
 
     @Column(columnDefinition = "text")
     private String comment;
@@ -47,7 +60,7 @@ public class TaskInstance {
     @Column(name = "photo_Base64", columnDefinition = "text")
     private List<String> photoBase64;
 
-    private boolean completed = false;
+    private boolean completed;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -55,18 +68,16 @@ public class TaskInstance {
     private LocalDateTime updatedAt;
 
 
-
-    // Гарантируем установку createdAt перед сохранением
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
 
-    // Можно добавить @PreUpdate для updatedAt
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
 }
+
 
 

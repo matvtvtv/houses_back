@@ -30,4 +30,7 @@ public class UserDailyStats {
 
     @Column(nullable = false)
     private int completedTasksCount = 0;
+    
+    @Column(nullable = false)
+    private int earnedMoney = 0; // Монеты за конкретный день
 }
