@@ -16,4 +16,7 @@ public interface UserRepository extends JpaRepository<UserModel, Long> {
     @Modifying
     @Query("UPDATE ChatData c SET c.money = 0")
     void resetAllCoins();
+
+    void deleteByLogin(String login);
+
 }

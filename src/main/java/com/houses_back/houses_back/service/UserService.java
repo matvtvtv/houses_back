@@ -3,6 +3,7 @@ package com.houses_back.houses_back.service;
 import org.springframework.stereotype.Service;
 
 import com.houses_back.houses_back.model.UserModel;
+import com.houses_back.houses_back.repository.ChatDataRepository;
 import com.houses_back.houses_back.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final ChatDataRepository chatRepository;
 
     public UserModel register(String login, String name, String password, String role) {
         if (userRepository.existsByLogin(login)) {
@@ -32,6 +34,16 @@ public class UserService {
         return userRepository.findByLogin(login)
             .filter(user -> user.getPassword().equals(password))
             .orElseThrow(() -> new RuntimeException("Invalid login or password"));
+    }
+    
+    public boolean deleteUserByLogin(String login) {
+        if (!userRepository.existsByLogin(login)) {
+            return false;
+        }
+
+        userRepository.deleteByLogin(login);
+        chatRepository.deleteByLogin(login);
+        return true;
     }
 
 

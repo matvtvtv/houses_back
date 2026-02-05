@@ -15,5 +15,7 @@ public interface ChatDataRepository extends JpaRepository<ChatData, Long> {
     List<ChatData> findByChatLogin(String chatLogin);
     boolean existsByChatLoginAndUserLogin(String chatLogin, String userLogin);
     boolean existsByChatLogin(String chatLogin);
+    void deleteByLogin(String login);
+    void deleteByLoginAndChatLogin(String login, String chatLogin);
 
 }

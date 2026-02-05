@@ -2,16 +2,20 @@ package com.houses_back.houses_back.controller;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.houses_back.houses_back.dto.ChatDataDTO;
 import com.houses_back.houses_back.dto.JoinChatDataDTO;
 import com.houses_back.houses_back.model.ChatData;
+import com.houses_back.houses_back.repository.ChatDataRepository;
 import com.houses_back.houses_back.service.ChatDataServise;
 
 import lombok.RequiredArgsConstructor;
@@ -24,7 +28,7 @@ public class ChatDataController {
 
 
     private final ChatDataServise chatDataServise;
-
+private final ChatDataRepository chatDataRepo;
     @PostMapping("/register")
         public ChatData register(@RequestBody ChatDataDTO request) {
         return chatDataServise.register(
@@ -48,6 +52,12 @@ public class ChatDataController {
      @GetMapping("/get_chats_users/{chatLogin}")
         public List <ChatData> findByChatLogin(@PathVariable String chatLogin){
         return chatDataServise.findByChatLogin(chatLogin);
+    }
+     @DeleteMapping("/delete/")
+    public ResponseEntity<?> deleteByLoginAndChatLogin(@RequestParam String login,@RequestParam String chatLogin) {
+
+        chatDataRepo.deleteByLoginAndChatLogin(login,chatLogin);
+        return ResponseEntity.ok().build();
     }
 
 
