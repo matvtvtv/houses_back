@@ -1,7 +1,6 @@
 package com.houses_back.houses_back.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -88,65 +87,53 @@ public class TaskService {
     /**
      * Получить/создать экземпляры задач для chatLogin в диапазоне дат.
      */
-    @Transactional
-    public List<TaskInstanceDTO> getOrCreateInstances(String chatLogin, LocalDate from, LocalDate to) {
-        List<TaskTemplate> templates = templateRepository.findByChatLoginOrderByCreatedAtAsc(chatLogin);
+  @Transactional
+public List<TaskInstanceDTO> getOrCreateInstances(String chatLogin, LocalDate from, LocalDate to) {
+    // Получаем все шаблоны для чата
+    List<TaskTemplate> templates = templateRepository.findByChatLoginOrderByCreatedAtAsc(chatLogin);
 
-        List<TaskInstanceDTO> result = new ArrayList<>();
+    List<TaskInstanceDTO> result = new ArrayList<>();
 
-        LocalDate cur = from;
-        while (!cur.isAfter(to)) {
-            for (TaskTemplate tpl : templates) {
-                if (matchesDate(tpl, cur)) {
-                    Optional<TaskInstance> opt = instanceRepository.findByTemplateAndTaskDate(tpl, cur);
-                    TaskInstance instance;
-                    if (opt.isPresent()) {
-                        instance = opt.get();
-                    } else {
-                        instance = TaskInstance.builder()
-                                .template(tpl)
-                                .taskDate(cur)
-                                .started(false)
-                                .confirmedByParent(false)
-                                .completed(false)
-                                .createdAt(LocalDateTime.now())
-                                .build();
-                        instance = instanceRepository.save(instance);
-                    }
-                    result.add(toDto(instance));
-                }
+    LocalDate current = from;
+    while (!current.isAfter(to)) {
+        for (TaskTemplate tpl : templates) {
+            // Проверяем, должна ли задача существовать на эту дату
+            if (shouldCreateInstanceForDate(tpl, current)) {
+                TaskInstance instance = findOrCreateInstanceForTemplate(tpl, current);
+                result.add(toDto(instance));
             }
-            cur = cur.plusDays(1);
         }
-
-        return result.stream()
-                .sorted((a, b) -> a.getTaskDate().compareTo(b.getTaskDate()))
-                .collect(Collectors.toList());
+        current = current.plusDays(1);
     }
 
-    private boolean matchesDate(TaskTemplate tpl, LocalDate date) {
-        if (tpl.getStartDate() != null && date.isBefore(tpl.getStartDate())) {
-            return false;
-        }
+    // Сортируем по дате
+    return result.stream()
+            .sorted((a, b) -> a.getTaskDate().compareTo(b.getTaskDate()))
+            .collect(Collectors.toList());
+}
 
-        if (!tpl.isRepeat()) {
-            if (tpl.getStartDate() == null) {
-                return false;
-            }
-            return date.equals(tpl.getStartDate());
-        }
+/**
+ * Проверяет, нужно ли создавать экземпляр задачи для конкретной даты
+ */
+private boolean shouldCreateInstanceForDate(TaskTemplate tpl, LocalDate date) {
+    LocalDate startDate = tpl.getStartDate() != null ? tpl.getStartDate() : LocalDate.now();
 
-        if (tpl.getRepeatDays() == null || tpl.getRepeatDays().isEmpty()) {
-            if (tpl.getStartDate() == null) {
-                return false;
-            }
-            return date.equals(tpl.getStartDate());
-        } else {
-            String dowName = date.getDayOfWeek().toString();
-            return tpl.getRepeatDays().stream()
-                    .anyMatch(s -> s != null && s.trim().equalsIgnoreCase(dowName));
-        }
+    // Если задача не повторяется — только на startDate
+    if (!tpl.isRepeat()) {
+        return date.equals(startDate);
     }
+
+    // Если repeatDays пустой — считаем, что повторяется каждый день начиная с startDate
+    if (tpl.getRepeatDays() == null || tpl.getRepeatDays().isEmpty()) {
+        return !date.isBefore(startDate);
+    }
+
+    // Проверка по дням недели
+    String dow = date.getDayOfWeek().toString(); // MONDAY, TUESDAY...
+    return tpl.getRepeatDays().stream()
+            .anyMatch(d -> d != null && d.trim().equalsIgnoreCase(dow)) && !date.isBefore(startDate);
+}
+
 
     public TaskInstanceDTO toDto(TaskInstance inst) {
         TaskInstanceDTO dto = new TaskInstanceDTO();
@@ -192,7 +179,7 @@ public class TaskService {
         inst.setStarted(update.isStarted());
         inst.setConfirmedByParent(update.isConfirmedByParent());
         inst.setUserLogin(update.getUserLogin());
-        inst.setUpdatedAt(LocalDateTime.now());
+        inst.setUpdatedAt(LocalDate.now());
         return instanceRepository.save(inst);
     }
 
@@ -204,7 +191,7 @@ public class TaskService {
         if (completed && !inst.isStarted()) {
             inst.setStarted(true);
         }
-        inst.setUpdatedAt(LocalDateTime.now());
+        inst.setUpdatedAt(LocalDate.now());
         return instanceRepository.save(inst);
     }
 
@@ -219,7 +206,7 @@ public class TaskService {
 
         if (!inst.isConfirmedByParent()) {
             inst.setConfirmedByParent(true);
-            inst.setUpdatedAt(LocalDateTime.now());
+            inst.setUpdatedAt(LocalDate.now());
             inst = instanceRepository.save(inst);
         }
         awardCoinsAndLogStats(inst);
@@ -277,7 +264,7 @@ public class TaskService {
                 .started(false)
                 .confirmedByParent(false)
                 .completed(false)
-                .createdAt(LocalDateTime.now())
+                .createdAt(LocalDate.now())
                 .build();
         return instanceRepository.save(instance);
     }

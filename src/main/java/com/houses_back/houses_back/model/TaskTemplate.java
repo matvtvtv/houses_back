@@ -48,9 +48,9 @@ public class TaskTemplate {
     private List<String> repeatDays;
 
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
 
-    private LocalDateTime updatedAt;
+    private LocalDate updatedAt;
    
     private String startTime;
     private String endTime;
@@ -63,12 +63,12 @@ public class TaskTemplate {
     // Автоматическая установка createdAt перед сохранением
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
+        createdAt = LocalDate.now();
     }
 
     // Автоматическая установка updatedAt перед обновлением
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        updatedAt = LocalDate.now();
     }
 }

@@ -81,7 +81,10 @@ public ResponseEntity<TaskInstance> updateInstance(
         LocalDate from = LocalDate.parse(fromStr);
         LocalDate to = LocalDate.parse(toStr);
         List<TaskInstanceDTO> list = taskService.getOrCreateInstances(chatLogin, from, to);
-        return ResponseEntity.ok(list);
+    
+        System.out.println("Request chatLogin=" + chatLogin + " from=" + from + " to=" + to);
+        System.out.println("Found tasks=" + list.size());
+return ResponseEntity.ok(list);
     }
 
   
