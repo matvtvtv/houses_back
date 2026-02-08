@@ -54,9 +54,9 @@ private final ChatDataRepository chatDataRepo;
         return chatDataServise.findByChatLogin(chatLogin);
     }
      @DeleteMapping("/delete/")
-    public ResponseEntity<?> deleteByLoginAndChatLogin(@RequestParam String login,@RequestParam String chatLogin) {
+    public ResponseEntity<?> deleteByUserLoginAndChatLogin(@RequestParam String userLogin,@RequestParam String chatLogin) {
 
-        chatDataRepo.deleteByLoginAndChatLogin(login,chatLogin);
+        chatDataRepo.deleteByUserLoginAndChatLogin(userLogin,chatLogin);
         return ResponseEntity.ok().build();
     }
 

@@ -43,7 +43,7 @@ public class UserService {
 
         
         userRepository.deleteByLogin(login);
-        chatRepository.deleteByLogin(login);
+        chatRepository.deleteByUserLogin(login);
         return true;
     }
 
