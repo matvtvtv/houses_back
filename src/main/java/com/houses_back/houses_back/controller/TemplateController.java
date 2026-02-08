@@ -25,4 +25,11 @@ public class TemplateController {
         TaskTemplate saved = taskService.updateTemplate(templateId, updated);
         return ResponseEntity.ok(saved);
     }
+    // в файле com.houses_back.houses_back.controller.TemplateController
+@DeleteMapping("/{templateId}")
+public ResponseEntity<?> deleteTemplate(@PathVariable Long templateId) {
+    taskService.deleteTemplate(templateId);
+    return ResponseEntity.noContent().build();
+}
+
 }

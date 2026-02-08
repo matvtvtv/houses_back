@@ -41,6 +41,7 @@ public class UserService {
             return false;
         }
 
+        
         userRepository.deleteByLogin(login);
         chatRepository.deleteByLogin(login);
         return true;

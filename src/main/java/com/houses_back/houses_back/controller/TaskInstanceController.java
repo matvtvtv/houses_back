@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -135,4 +136,11 @@ public ResponseEntity<TaskTemplate> updateTemplate(@PathVariable Long templateId
     
     return ResponseEntity.ok(updated);
 }
+// в контроллере, где обрабатываются instance задачи
+@DeleteMapping("/instance/{instanceId}")
+public ResponseEntity<?> deleteInstance(@PathVariable Long instanceId) {
+    taskService.deleteInstance(instanceId);
+    return ResponseEntity.noContent().build();
+}
+
 }

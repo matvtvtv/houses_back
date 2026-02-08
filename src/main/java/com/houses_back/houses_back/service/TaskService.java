@@ -324,4 +324,27 @@ public class TaskService {
         return instanceRepository.findById(instanceId)
                 .orElseThrow(() -> new RuntimeException("TaskInstance not found: " + instanceId));
     }
+    @Transactional
+public void deleteInstance(Long instanceId) {
+    if (!instanceRepository.existsById(instanceId)) {
+        throw new RuntimeException("Instance not found: " + instanceId);
+    }
+    instanceRepository.deleteById(instanceId);
+}
+
+@Transactional
+public void deleteTemplate(Long templateId) {
+    TaskTemplate tpl = templateRepository.findById(templateId)
+            .orElseThrow(() -> new RuntimeException("Template not found: " + templateId));
+
+    // удалить все экземпляры, связанные с шаблоном
+    List<TaskInstance> instances = instanceRepository.findByTemplate(tpl);
+    if (instances != null && !instances.isEmpty()) {
+        instanceRepository.deleteAll(instances);
+    }
+
+    templateRepository.deleteById(templateId);
+}
+
+    
 }

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,7 @@ import com.houses_back.houses_back.model.TaskTemplate;
 import com.houses_back.houses_back.repository.TaskInstanceRepository;
 import com.houses_back.houses_back.service.TaskService;
 
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -47,4 +49,20 @@ public class TaskWsController {
             messagingTemplate.convertAndSend("/topic/tasks/" + chatLogin, dto);
         }
     }
+
+@Data
+public class DeleteEvent {
+    private String type;
+    private Long instanceId;
+    private Long templateId;
+    private boolean isTemplate;
+}
+
+@MessageMapping("/tasks/{chatLogin}/delete")
+public void deleteTaskWs(
+    @DestinationVariable String chatLogin,
+    @Payload DeleteEvent event
+) {
+    messagingTemplate.convertAndSend("/topic/tasks/" + chatLogin, event);
+}
 }
