@@ -1,8 +1,10 @@
 package com.houses_back.houses_back.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.houses_back.houses_back.model.ChatData;
 import com.houses_back.houses_back.repository.ChatDataRepository;
@@ -42,32 +44,41 @@ public class ChatDataServise {
         return chatDataRepository.save(chat);
     }
     
-    public ChatData joinChat(String chatLogin, String userLogin) {
+  @Transactional
+public ChatData joinChat(String chatLogin, String userLogin) {
 
-   
-        if (!chatDataRepository.existsByChatLogin(chatLogin)) {
-            throw new RuntimeException("Chat does not exist");
-        }
+    // 1️⃣ Проверка существования чата
+    if (!chatDataRepository.existsByChatLogin(chatLogin)) {
+        throw new RuntimeException("Chat does not exist");
+    }
 
-        if (chatDataRepository.existsByChatLoginAndUserLogin(chatLogin, userLogin)) {
-            throw new RuntimeException("User already in chat");
-        }
+    // 2️⃣ Проверяем, есть ли уже пользователь
+    Optional<ChatData> existingUser =
+            chatDataRepository.findByChatLoginAndUserLogin(chatLogin, userLogin);
 
-        ChatData parentChat = chatDataRepository
-            .findAll()
+    if (existingUser.isPresent()) {
+        return existingUser.get(); // возвращаем ChatData, НЕ Optional
+    }
+
+    // 3️⃣ Получаем любую запись чата
+    ChatData parentChat = chatDataRepository
+            .findByChatLogin(chatLogin)
             .stream()
-            .filter(c -> c.getChatLogin().equals(chatLogin))
             .findFirst()
             .orElseThrow();
 
-        ChatData chat = new ChatData();
-        chat.setChatLogin(chatLogin);
-        chat.setChatName(parentChat.getChatName());
-        chat.setUserLogin(userLogin);
-        chat.setUserRole("CHILD");
-        chat.setMoney(0);
+    // 4️⃣ Создаём нового участника
+    ChatData chat = new ChatData();
+    chat.setChatLogin(chatLogin);
+    chat.setChatName(parentChat.getChatName());
+    chat.setUserLogin(userLogin);
+    chat.setUserRole("CHILD");
+    chat.setMoney(0);
 
-        return chatDataRepository.save(chat);
+    return chatDataRepository.save(chat); // save(ChatData)
+}
+    @Transactional
+    public void deleteByUserLoginAndChatLogin(String userLogin, String chatLogin) {
+        chatDataRepository.deleteByUserLoginAndChatLogin(userLogin, chatLogin);
     }
-
 }

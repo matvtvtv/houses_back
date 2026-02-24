@@ -333,5 +333,9 @@ public void deleteTemplate(Long templateId) {
     templateRepository.deleteById(templateId);
 }
 
-    
+    public TaskTemplate getTemplate(Long templateId) {
+    return templateRepository.findById(templateId)
+            .orElseThrow(() -> new RuntimeException("Template not found"));
+}
+
 }
